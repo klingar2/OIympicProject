@@ -52,12 +52,14 @@ olympians_medalists_selected_modern['Gold_#'] = np.where(olympians_medalists_sel
 olympians_medalists_selected_modern['Silver_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Silver',1,0)
 olympians_medalists_selected_modern['Bronze_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Bronze',1,0)
 olympians_medalists_selected_modern['Medal_#'] = np.where(olympians_medalists_selected_modern['Medal'] !='NA',1,0)
+olympians_medalists_selected_modern['Medal_#'] = olympians_medalists_selected_modern['Medal_#'].astype(int)
+
 #print(olympians_medalists_selected_modern.head(5))
 
 # To do> Summarise medal count by Olympics games, by country
-olympians_summarised = olympians_medalists_selected_modern.pivot_table(values ="Medal_#",index = "NOC", columns = "Medal",
-                                                                       fill_value=0)
-print(olympians_summarised.head())
+olympians_summarised = olympians_medalists_selected_modern.pivot_table(values ="Medal_#",index = ["Year","NOC","Games"], columns = "Medal",
+                                                                       fill_value=0,aggfunc=np.sum)
+print(olympians_summarised)
 
 
 ######################## working with file_table_gdp.Filter file_gdp_per_capita to include data only from 1948 onwards
