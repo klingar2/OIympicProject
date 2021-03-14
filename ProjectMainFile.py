@@ -8,13 +8,14 @@ file_gdp_per_capita = pd.read_csv('GapMinder - GDP per capita - Dataset - v26 - 
 file_table_gdp = pd.read_csv('total_gdp_ppp_inflation_adjusted.csv')
 file_table_lifeexp = pd.read_csv('GapMinder - LifeExpectancyAtBirthTotal - Dataset.csv')
 
-#Start & end date for analysis. Change the value of
+#################### Choose the type of analysis you would like to do
+#Start & end date for analysis. Specify the range of Olympics,
 start_date = 1948
 end_date = 2012
 #Olympics time Summer or Winter
 olympics_type = "Summer"
-# Choose Medal Type you want to examine
-medal_type = "Total"
+# Choose Medal Type you want to examine [Total/Gold/Silver/Bronze]
+medal_type_analysis = "Total"
 
 #creating a list of Olympic years using a while loop. Using start_year + 2 because the winter olympics years changed in the 1990s
 olympics_years = []
@@ -28,7 +29,22 @@ while start_date_x < end_date:
 ########################### Working with the file that contains all Olympic events (file_olympians_all)
 
 # Subsetting file_olympians_all to only include events where the Olympian won a medal
-medal = ["Gold", "Silver", "Bronze"]
+file_olympians_all['Gold_#'] = np.where(file_olympians_all['Medal'] =='Gold',1,0)
+file_olympians_all['Silver_#'] = np.where(file_olympians_all['Medal'] =='Silver',1,0)
+file_olympians_all['Bronze_#'] = np.where(file_olympians_all['Medal'] =='Bronze',1,0)
+file_olympians_all['Medal_#'] = np.where(file_olympians_all['Medal'] !='NA',1,0)
+
+# changing medal to conditional variable what is chosen by user
+#medal = ["Gold", "Silver", "Bronze"]
+if "Total" == medal_type_analysis:
+    medal = ["Gold", "Silver", "Bronze"]
+elif "Gold" == medal_type_analysis:
+    medal = ["Gold"]
+elif "Silver" == medal_type_analysis:
+    medal =["Silver"]
+elif "Bronze" == medal_type_analysis:
+    medal = ["Bronze"]
+
 only_medalists = file_olympians_all['Medal'].isin(medal)
 olympians_medalists = file_olympians_all[only_medalists]
 #print(file_olympians_all.shape,olympians_medalists.shape)
@@ -47,12 +63,12 @@ modern_olympics = olympians_medalists_selected['Year'].isin(olympics_years)
 olympians_medalists_selected_modern = olympians_medalists_selected[modern_olympics]
 #print(olympians_medalists_selected_modern.head(3))
 
-#Modify dataframe to add numerical columns for Gold, Silver, Bronze
-olympians_medalists_selected_modern['Gold_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Gold',1,0)
-olympians_medalists_selected_modern['Silver_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Silver',1,0)
-olympians_medalists_selected_modern['Bronze_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Bronze',1,0)
-olympians_medalists_selected_modern['Medal_#'] = np.where(olympians_medalists_selected_modern['Medal'] !='NA',1,0)
-olympians_medalists_selected_modern['Medal_#'] = olympians_medalists_selected_modern['Medal_#'].astype(int)
+#Modify dataframe to add numerical columns for Gold, Silver, Bronze. **** this is creating a 'SettingWithCopyWarning' ERROR so added columns at
+#olympians_medalists_selected_modern['Gold_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Gold',1,0)
+#olympians_medalists_selected_modern['Silver_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Silver',1,0)
+#olympians_medalists_selected_modern['Bronze_#'] = np.where(olympians_medalists_selected_modern['Medal'] =='Bronze',1,0)
+#olympians_medalists_selected_modern['Medal_#'] = np.where(olympians_medalists_selected_modern['Medal'] !='NA',1,0)
+#olympians_medalists_selected_modern['Medal_#'] = olympians_medalists_selected_modern['Medal_#'].astype(int)
 
 #print(olympians_medalists_selected_modern.head(5))
 
