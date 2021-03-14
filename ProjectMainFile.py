@@ -18,7 +18,7 @@ file_table_lifeexp = pd.read_csv('GapMinder - LifeExpectancyAtBirthTotal - Datas
 #################### Choose the type of analysis you would like to do
 #Start & end date for analysis. Specify the range of Olympics,
 start_date = 1960
-end_date = 2000
+end_date = 2012
 #Olympics time Summer or Winter
 olympics_type = "Summer"
 # Choose Medal Type you want to examine [Total/Gold/Silver/Bronze]
