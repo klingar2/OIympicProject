@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 pd.set_option('display.width', 400)
-pd.set_option('display.max_columns', 20)
-pd.options.display.float_format = '{:.0f}'.format
+pd.set_option('display.max_columns', 26)
+pd.options.display.float_format = '{:.2f}'.format
 
 #================================ IMPORTING THE FILES TO BE USED
 
@@ -21,7 +21,7 @@ file_iso_country_continent = pd.read_csv('ISO3_ISO2_Country_Continent.csv')
 #################### Choose the type of analysis you would like to do
 #Start & end date for analysis. Specify the range of Olympics,
 start_date = 1960
-end_date = 1988
+end_date = 2018
 #Olympics time Summer or Winter
 olympics_type = "Summer"
 # Choose Medal Type you want to examine [Total/Gold/Silver/Bronze]
@@ -135,7 +135,7 @@ gdp_melted_sorted = gdp_melted.sort_values(['country', 'year'], ascending=True)
 
 #Convert values in column 'year' from string to number
 gdp_melted_sorted['year'] = gdp_melted_sorted['year'].astype(int)
-#gdp_melted_sorted['gdp'] = gdp_melted_sorted['gdp'].astype(int)
+
 
 # need to remove irrelevant years. I know I don't need to this. As I can just join this dataframe to summarized Olympic table. Doing this step for practicing subsetting dataframes
 gdp_melted_sorted_olympic_years = gdp_melted_sorted['year'].isin(olympics_years)
@@ -154,35 +154,59 @@ lifeexp_melted = file_table_lifeexp.melt(id_vars = ['country'],
                                         value_vars = lifeexp_table_years,
                                  var_name = ['year'], value_name = 'life_expectancy')
 lifeexp_melted_sorted = lifeexp_melted.sort_values(['country', 'year'], ascending=True)
-#print(lifeexp_melted_sorted.head(10))
+lifeexp_melted_sorted['year'] = lifeexp_melted_sorted['year'].astype(int)
+#print(lifeexp_melted_sorted.head(5))
 
 #===========================================================MERGING DATA FRAMES
-
-
-
 # Left join on the summarid olympics results table and the GDP per capita
 
 olympics_results_gdp_per_capita = olympians_summarised.merge(gdp_per_capita_modern, how = 'left',
                                                              left_on = ['ISO', 'Year'], right_on = ['geo', 'time'],
                                                              suffixes = ('_OLY','_GPC'))
-
 ############ Adding column with [Team] + [Year]
 #olympics_results_gdp_per_capita["Team & Games"] = [str(olympics_results_gdp_per_capita["name"]) + str(olympics_results_gdp_per_capita["time"])]
-olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name",'Continent_Name',"time","Bronze","Silver","Gold","All","Income per person","GDP total"]]
+#lympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name",'Continent_Name',"time","Bronze","Silver","Gold","All","Income per person","GDP total"]]
+
 #print(olympians_summarised.columns)
 #print(gdp_per_capita_modern.columns)
 #print(olympics_results_gdp_per_capita.columns)
 #olympics_results_gdp_per_capita['Total_#'] = olympics_results_gdp_per_capita.Gold + olympics_results_gdp_per_capita.Silver + olympics_results_gdp_per_capita.Bronze
 # Removing this line since Margins was addeed to the pivot table
-
-
 #print(olympics_results_gdp_per_capita.iloc[[0,2],:])
 #print(olympians_summarised.type)
 
-
-
 #print(olympics_results_gdp_per_capita.head(1))
-corr = olympics_results_gdp_per_capita.corr()
+
+
+########============= Merge lifeexp_melted_sorted with gdp_per_capita_modern on country/year & name/time
+lifeexp_melted_sorted_after_start_date = lifeexp_melted_sorted['year'].isin(olympics_years)
+lifeexp_melted_modern = lifeexp_melted_sorted[lifeexp_melted_sorted_after_start_date]
+
+lifeexp_gdp_per_capita = lifeexp_melted_modern.merge(gdp_per_capita_modern, how = 'outer',
+                                                             left_on = ['country', 'year'], right_on = ['name', 'time'],
+                                                             suffixes = ('_life','_gdppc'))
+
+
+#print(lifeexp_gdp_per_capita.head(50))
+#print(lifeexp_melted_modern.head(2))
+#print(gdp_per_capita_modern.head(2))
+
+######## MERGE lifeexp_gdp_per_capita with file_noc_iso
+lifeexp_gdp_per_capita_NOC_ISO = lifeexp_gdp_per_capita.merge(file_noc_iso, how = 'left',
+                                                              left_on = 'geo', right_on = 'ISO')
+#print(lifeexp_gdp_per_capita.head(2))
+#print(file_noc_iso.head(2))
+#print(olympians_summarised.head(2))
+#print(lifeexp_gdp_per_capita_NOC_ISO.head(2))
+
+############## MERGE lifeexp_gdp_per_capita_NOC_ISO with olympians_summarised
+olympics_results_lifeexp = olympians_summarised.merge(lifeexp_gdp_per_capita_NOC_ISO, how = 'left',
+                                                             left_on = ['Year', 'ISO'], right_on = ['year', 'geo'],
+                                                             suffixes = ('_OLY','_GPC'))
+#print(olympics_results_lifeexp.head(2))
+
+############## Calculate and print Correlation matrix
+#corr = olympics_results_gdp_per_capita.corr()
 #print(corr)
 
 
@@ -193,21 +217,33 @@ corr = olympics_results_gdp_per_capita.corr()
 #medals_versus_gdp_per_capita = olympics_results_gdp_per_capita.plot(kind = 'scatter', y = 'All', x = 'GDP total')
 #plt.show()
 
-##########################USING SEABORN
+##########################USING SEABORN for GDP (or GDP/capita) vs total medals
 
-sns.set_theme(style='white')
-data_for_sns = olympics_results_gdp_per_capita
+#sns.set_theme(style='white')
+#data_for_sns = olympics_results_gdp_per_capita
 #print(data_for_sns.head())
+#sns.set_style('dark')
+#sns.scatterplot(x =  'Income per person',
+#               y =  'All',
+#               hue = 'Continent_Name',
+#               size = 'GDP total',
+#               alpha = 0.8,
+#               legend = False,
+#               data = data_for_sns)
+#plt.show()
+
+##########################USING SEABORN for life expectancy vs total medals
+#sns.set_theme(style='white')
+lifeexp_data_for_sns = olympics_results_lifeexp
+#print(lifeexp_data_for_sns.head())
 sns.set_style('dark')
-sns.scatterplot(x =  'Income per person',
+sns.scatterplot(x =  'life_expectancy',
                y =  'All',
-               hue = 'Continent_Name',
+               hue = 'Continent_Name_OLY',
                size = 'GDP total',
                alpha = 0.8,
                legend = True,
-               data = data_for_sns)
-
+               data = lifeexp_data_for_sns)
 plt.show()
-
 
 #Using Numpy https://stackabuse.com/calculating-pearson-correlation-coefficient-in-python-with-numpy/ to tell the corellation between GDP and olmypic performance
