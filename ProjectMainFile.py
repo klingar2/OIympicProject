@@ -248,6 +248,7 @@ plt.xlabel("GDP in $ trillions")
 plt.title(str(medal_type_analysis) + str(" Medals Tally per ") + str(olympics_type) + str(' Olympics from ') +str(start_date) + str(" to ") + str(end_date)+  str(", by country")  )
 plt.show()
 
+
 ##########################USING SEABORN for life expectancy vs total medals
 #sns.set_theme(style='white')
 #lifeexp_data_for_sns = olympics_results_lifeexp
