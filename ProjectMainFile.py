@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 pd.set_option('display.width', 400)
-pd.set_option('display.max_columns', 15)
-pd.options.display.float_format = '{:.2f}'.format
+pd.set_option('display.max_columns', 20)
+pd.options.display.float_format = '{:.0f}'.format
 
 #================================ IMPORTING THE FILES TO BE USED
 
@@ -19,7 +19,7 @@ file_noc_iso = pd.read_csv('NOC_ISO_FIFA.csv')
 #============================= PARAMETERS THAT CAN BE ADJUSTED FOR ANALYSIS
 #################### Choose the type of analysis you would like to do
 #Start & end date for analysis. Specify the range of Olympics,
-start_date = 1960
+start_date = 1948
 end_date = 2012
 #Olympics time Summer or Winter
 olympics_type = "Summer"
@@ -82,15 +82,26 @@ olympians_medalists_selected_modern = olympians_medalists_selected[modern_olympi
 
 #print(olympians_medalists_selected_modern.head(5))
 
-# To do> Summarise medal count by Olympics games, by country. Ad
+###################### MERGING olympians_medalists_selected_modern that contains NOC codes with NOC_IOC that contains NOC and ISO3 codes (since other datasets use ISO3 code)
+
+olympians_medalists_selected_modern = olympians_medalists_selected_modern.merge(file_noc_iso, how = 'left',
+                                                             left_on = 'NOC', right_on = 'IOC',
+                                                             suffixes = ('_OLY','_GPC'))
+
+#print(olympians_medalists_selected_modern.head(25))
+
+# To do> Summarise medal count by Olympics games, by country.
 olympians_summarised = olympians_medalists_selected_modern.pivot_table(values ="Medal_#",
-                                                                       index = ["Year","NOC","Games"],
+                                                                       index = ["Year","Team" ,"ISO","NOC", "Games"],
                                                                        columns = "Medal",
                                                                        margins = True,
                                                                        fill_value=0,
-                                                                       aggfunc=np.sum)
-#print(olympians_summarised.head())
+                                                                      aggfunc=np.sum)
 
+#print(olympians_summarised.head(25))
+
+#print(olympians_summarised.head(1))
+#olympians_summarised.to_csv(r'C:\Users\Kiran\Google Drive\Learning\03 - UCD - intro to Python\10. Final Project\Data\CSVs from Pandas\olympians_summarised.csv', index = False, header = True)
 
 ######################## working with file_gdp_per_capita. Filter file_gdp_per_capita to inlclude only years in range
 file_gdp_per_capita['geo'] = file_gdp_per_capita['geo'].str.upper()
@@ -147,41 +158,49 @@ lifeexp_melted_sorted = lifeexp_melted.sort_values(['country', 'year'], ascendin
 # Left join on the summarid olympics results table and the GDP per capita
 
 olympics_results_gdp_per_capita = olympians_summarised.merge(gdp_per_capita_modern, how = 'left',
-                                                             left_on = ['Year', 'NOC'], right_on = ['time', 'geo'],
+                                                             left_on = ['Year', 'ISO'], right_on = ['time', 'geo'],
                                                              suffixes = ('_OLY','_GPC'))
 
+print(olympians_summarised.head(1))
+print(gdp_per_capita_modern.head(2))
+print(olympics_results_gdp_per_capita.head(3))
 
 #olympics_results_gdp_per_capita['Total_#'] = olympics_results_gdp_per_capita.Gold + olympics_results_gdp_per_capita.Silver + olympics_results_gdp_per_capita.Bronze
 # Removing this line since Margins was addeed to the pivot table
-#olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name","time","Bronze","Silver","Gold","Total_#","Income per person","GDP total"]]
-#print(olympians_summarised.head())
+olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name","time","Bronze","Silver","Gold","All","Income per person","GDP total"]]
+
 #print(olympics_results_gdp_per_capita.iloc[[0,2],:])
 #print(olympians_summarised.type)
-#print(olympians_summarised.head(10))
 
-print(olympics_results_gdp_per_capita.head(10))
-#corr = olympics_results_gdp_per_capita.corr()
+
+
+#print(olympics_results_gdp_per_capita.head(1))
+corr = olympics_results_gdp_per_capita.corr()
 #print(corr)
 
 
 #################### Output to CSV
-olympics_results_gdp_per_capita.to_csv(r'C:\Users\Kiran\Google Drive\Learning\03 - UCD - intro to Python\10. Final Project\Data\CSVs from Pandas\olympics_results_gdp_per_capita.csv',index = False, header = True)
+#olympics_results_gdp_per_capita.to_csv(r'C:\Users\Kiran\Google Drive\Learning\03 - UCD - intro to Python\10. Final Project\Data\CSVs from Pandas\olympics_results_gdp_per_capita.csv',index = False, header = True)
+#print(olympics_results_gdp_per_capita.head())
 #===================Using scatter plot from  PYPLOT
 #medals_versus_gdp_per_capita = olympics_results_gdp_per_capita.plot(kind = 'scatter', y = 'All', x = 'GDP total')
 #plt.show()
 
 ##########################USING SEABORN
-#sns.set_theme(style='white')
-#data_for_sns = olympics_results_gdp_per_capita
-#sns.set_style('dark')
-#sns.scatterplot(x =  'Income per person',
-#               y =  'All',
-#               hue = 'name',
-#               size = 'GDP total',
-#               alpha = 0.8,
-#               legend = False,
-#               data = data_for_sns)
 
-#plt.show()
+sns.set_theme(style='white')
+data_for_sns = olympics_results_gdp_per_capita
+#print(data_for_sns.head())
+sns.set_style('dark')
+sns.scatterplot(x =  'Income per person',
+               y =  'All',
+               hue = 'name',
+               size = 'GDP total',
+               alpha = 0.8,
+               legend = False,
+               data = data_for_sns)
+
+plt.show()
+
 
 #Using Numpy https://stackabuse.com/calculating-pearson-correlation-coefficient-in-python-with-numpy/ to tell the corellation between GDP and olmypic performance
