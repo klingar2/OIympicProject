@@ -14,13 +14,14 @@ file_gdp_per_capita = pd.read_csv('GapMinder - GDP per capita - Dataset - v26 - 
 file_table_gdp = pd.read_csv('total_gdp_ppp_inflation_adjusted.csv')
 file_table_lifeexp = pd.read_csv('GapMinder - LifeExpectancyAtBirthTotal - Dataset.csv')
 file_noc_iso = pd.read_csv('NOC_ISO_FIFA.csv')
-#print(file_noc_iso.head())
+file_iso_country_continent = pd.read_csv('ISO3_ISO2_Country_Continent.csv')
+#print(file_iso_country_continent.head())
 
 #============================= PARAMETERS THAT CAN BE ADJUSTED FOR ANALYSIS
 #################### Choose the type of analysis you would like to do
 #Start & end date for analysis. Specify the range of Olympics,
-start_date = 1948
-end_date = 2012
+start_date = 1960
+end_date = 1988
 #Olympics time Summer or Winter
 olympics_type = "Summer"
 # Choose Medal Type you want to examine [Total/Gold/Silver/Bronze]
@@ -84,21 +85,25 @@ olympians_medalists_selected_modern = olympians_medalists_selected[modern_olympi
 
 ###################### MERGING olympians_medalists_selected_modern that contains NOC codes with NOC_IOC that contains NOC and ISO3 codes (since other datasets use ISO3 code)
 
+file_noc_iso = file_noc_iso.merge(file_iso_country_continent, how = 'left',
+                                  left_on = 'ISO', right_on = 'Three_Letter_Country_Code')
+
+
 olympians_medalists_selected_modern = olympians_medalists_selected_modern.merge(file_noc_iso, how = 'left',
                                                              left_on = 'NOC', right_on = 'IOC',
                                                              suffixes = ('_OLY','_GPC'))
 
-#print(olympians_medalists_selected_modern.head(25))
+#print(olympians_medalists_selected_modern.head(1))
 
 # To do> Summarise medal count by Olympics games, by country.
 olympians_summarised = olympians_medalists_selected_modern.pivot_table(values ="Medal_#",
-                                                                       index = ["Year","Team" ,"ISO","NOC", "Games"],
+                                                                       index = ["Year","Team" ,"ISO","NOC", "Games","Continent_Name"],
                                                                        columns = "Medal",
                                                                        margins = True,
                                                                        fill_value=0,
-                                                                      aggfunc=np.sum)
+                                                                      aggfunc=np.sum).reset_index()
 
-#print(olympians_summarised.head(25))
+#print(olympians_summarised.head(1))
 
 #print(olympians_summarised.head(1))
 #olympians_summarised.to_csv(r'C:\Users\Kiran\Google Drive\Learning\03 - UCD - intro to Python\10. Final Project\Data\CSVs from Pandas\olympians_summarised.csv', index = False, header = True)
@@ -158,16 +163,18 @@ lifeexp_melted_sorted = lifeexp_melted.sort_values(['country', 'year'], ascendin
 # Left join on the summarid olympics results table and the GDP per capita
 
 olympics_results_gdp_per_capita = olympians_summarised.merge(gdp_per_capita_modern, how = 'left',
-                                                             left_on = ['Year', 'ISO'], right_on = ['time', 'geo'],
+                                                             left_on = ['ISO', 'Year'], right_on = ['geo', 'time'],
                                                              suffixes = ('_OLY','_GPC'))
 
-print(olympians_summarised.head(1))
-print(gdp_per_capita_modern.head(2))
-print(olympics_results_gdp_per_capita.head(3))
-
+############ Adding column with [Team] + [Year]
+#olympics_results_gdp_per_capita["Team & Games"] = [str(olympics_results_gdp_per_capita["name"]) + str(olympics_results_gdp_per_capita["time"])]
+olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name",'Continent_Name',"time","Bronze","Silver","Gold","All","Income per person","GDP total"]]
+#print(olympians_summarised.columns)
+#print(gdp_per_capita_modern.columns)
+#print(olympics_results_gdp_per_capita.columns)
 #olympics_results_gdp_per_capita['Total_#'] = olympics_results_gdp_per_capita.Gold + olympics_results_gdp_per_capita.Silver + olympics_results_gdp_per_capita.Bronze
 # Removing this line since Margins was addeed to the pivot table
-olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name","time","Bronze","Silver","Gold","All","Income per person","GDP total"]]
+
 
 #print(olympics_results_gdp_per_capita.iloc[[0,2],:])
 #print(olympians_summarised.type)
@@ -194,10 +201,10 @@ data_for_sns = olympics_results_gdp_per_capita
 sns.set_style('dark')
 sns.scatterplot(x =  'Income per person',
                y =  'All',
-               hue = 'name',
+               hue = 'Continent_Name',
                size = 'GDP total',
                alpha = 0.8,
-               legend = False,
+               legend = True,
                data = data_for_sns)
 
 plt.show()
