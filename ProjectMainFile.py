@@ -13,6 +13,8 @@ file_olympians_all = pd.read_csv('athlete_events.csv')
 file_gdp_per_capita = pd.read_csv('GapMinder - GDP per capita - Dataset - v26 - data-for-countries-etc-by-year.csv')
 file_table_gdp = pd.read_csv('total_gdp_ppp_inflation_adjusted.csv')
 file_table_lifeexp = pd.read_csv('GapMinder - LifeExpectancyAtBirthTotal - Dataset.csv')
+file_noc_iso = pd.read_csv('NOC_ISO_FIFA.csv')
+#print(file_noc_iso.head())
 
 #============================= PARAMETERS THAT CAN BE ADJUSTED FOR ANALYSIS
 #################### Choose the type of analysis you would like to do
@@ -80,10 +82,14 @@ olympians_medalists_selected_modern = olympians_medalists_selected[modern_olympi
 
 #print(olympians_medalists_selected_modern.head(5))
 
-# To do> Summarise medal count by Olympics games, by country
-olympians_summarised = olympians_medalists_selected_modern.pivot_table(values ="Medal_#",index = ["Year","NOC","Games"], columns = "Medal",
-                                                                       fill_value=0,aggfunc=np.sum)
-#print(olympians_summarised)
+# To do> Summarise medal count by Olympics games, by country. Ad
+olympians_summarised = olympians_medalists_selected_modern.pivot_table(values ="Medal_#",
+                                                                       index = ["Year","NOC","Games"],
+                                                                       columns = "Medal",
+                                                                       margins = True,
+                                                                       fill_value=0,
+                                                                       aggfunc=np.sum)
+#print(olympians_summarised.head())
 
 
 ######################## working with file_gdp_per_capita. Filter file_gdp_per_capita to inlclude only years in range
@@ -135,6 +141,9 @@ lifeexp_melted_sorted = lifeexp_melted.sort_values(['country', 'year'], ascendin
 #print(lifeexp_melted_sorted.head(10))
 
 #===========================================================MERGING DATA FRAMES
+
+
+
 # Left join on the summarid olympics results table and the GDP per capita
 
 olympics_results_gdp_per_capita = olympians_summarised.merge(gdp_per_capita_modern, how = 'left',
@@ -142,32 +151,37 @@ olympics_results_gdp_per_capita = olympians_summarised.merge(gdp_per_capita_mode
                                                              suffixes = ('_OLY','_GPC'))
 
 
-olympics_results_gdp_per_capita['Total_#'] = olympics_results_gdp_per_capita.Gold + olympics_results_gdp_per_capita.Silver + olympics_results_gdp_per_capita.Bronze
-olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name","time","Bronze","Silver","Gold","Total_#","Income per person","GDP total"]]
+#olympics_results_gdp_per_capita['Total_#'] = olympics_results_gdp_per_capita.Gold + olympics_results_gdp_per_capita.Silver + olympics_results_gdp_per_capita.Bronze
+# Removing this line since Margins was addeed to the pivot table
+#olympics_results_gdp_per_capita = olympics_results_gdp_per_capita[["geo","name","time","Bronze","Silver","Gold","Total_#","Income per person","GDP total"]]
 #print(olympians_summarised.head())
 #print(olympics_results_gdp_per_capita.iloc[[0,2],:])
 #print(olympians_summarised.type)
 #print(olympians_summarised.head(10))
-print(olympics_results_gdp_per_capita.head(10))
-corr = olympics_results_gdp_per_capita.corr()
-print(corr)
 
+print(olympics_results_gdp_per_capita.head(10))
+#corr = olympics_results_gdp_per_capita.corr()
+#print(corr)
+
+
+#################### Output to CSV
+olympics_results_gdp_per_capita.to_csv(r'C:\Users\Kiran\Google Drive\Learning\03 - UCD - intro to Python\10. Final Project\Data\CSVs from Pandas\olympics_results_gdp_per_capita.csv',index = False, header = True)
 #===================Using scatter plot from  PYPLOT
-#medals_versus_gdp_per_capita = olympics_results_gdp_per_capita.plot(kind = 'scatter', y = 'Total_#', x = 'GDP total')
+#medals_versus_gdp_per_capita = olympics_results_gdp_per_capita.plot(kind = 'scatter', y = 'All', x = 'GDP total')
 #plt.show()
 
-#USING SEABORN
-sns.set_theme(style='white')
-data_for_sns = olympics_results_gdp_per_capita
-sns.set_style('dark')
-sns.scatterplot(x =  'GDP total',
-                y =  'Total_#',
-                hue = 'name',
-                size = 'Income per person',
-                alpha = 0.8,
-                legend = False,
-                data = data_for_sns
-                )
-plt.show()
+##########################USING SEABORN
+#sns.set_theme(style='white')
+#data_for_sns = olympics_results_gdp_per_capita
+#sns.set_style('dark')
+#sns.scatterplot(x =  'Income per person',
+#               y =  'All',
+#               hue = 'name',
+#               size = 'GDP total',
+#               alpha = 0.8,
+#               legend = False,
+#               data = data_for_sns)
+
+#plt.show()
 
 #Using Numpy https://stackabuse.com/calculating-pearson-correlation-coefficient-in-python-with-numpy/ to tell the corellation between GDP and olmypic performance
