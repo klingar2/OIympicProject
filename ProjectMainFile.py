@@ -231,22 +231,28 @@ corr_for_life_exp = olympics_results_lifeexp.corr()
 
 ##########################USING SEABORN for GDP (or GDP/capita) vs total medals
 
-sns.set_theme(style='white')
+#sns.set_theme(style='white')
 data_for_sns = olympics_results_gdp_per_capita
 ##print(data_for_sns.head())
-sns.set_style('white')
-sns.scatterplot(x =  'GDP total',
-               y =  'All',
-               hue = 'Continent_Name',
-               alpha = 1,
-               legend = True,
-               data = data_for_sns)
+#sns.set_style('white')
+#sns.scatterplot(x =  'GDP total',
+#               y =  'All',
+#               hue = 'Continent_Name',
+#               alpha = 1,
+#               legend = True,
+#               data = data_for_sns)
 #size = 'Income per person',
-plt.ylabel("Medals tally")
-plt.xlabel("GDP in $ trillions")
+#plt.ylabel("Medals tally")
+#plt.xlabel("GDP in $ trillions")
 #plt.legend(title = 'Continents', label = 'Continent_Name')
-plt.title(str(medal_type_analysis) + str(" Medals Tally per ") + str(olympics_type) + str(' Olympics from ') +str(start_date) + str(" to ") + str(end_date)+  str(", by country")  )
-plt.show()
+#plt.title(str(medal_type_analysis) + str(" Medals Tally per ") + str(olympics_type) + str(' Olympics from ') +str(start_date) + str(" to ") + str(end_date)+  str(", by country")  )
+#plt.show()
+
+
+
+##################3 Trying a regplot
+#sns.regplot(x="GDP total", y="All", data=data_for_sns)
+#plt.show()
 
 
 ##########################USING SEABORN for life expectancy vs total medals
