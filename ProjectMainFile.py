@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import requests
 pd.set_option('display.width', 400)
 pd.set_option('display.max_columns', 26)
 pd.options.display.float_format = '{:.2f}'.format
@@ -37,6 +38,14 @@ while start_date_x < end_date:
     olympics_years.append(start_date_x)
 #print(olympics_years)
 
+#####################= Example of using an API to retrieve data. This data is not used in the analysis. Hence the code has been commented out.
+#Population info for all countries for the years 1995 to 1997 were retrieved
+#url = 'http://api.worldbank.org/v2/country/all/indicator/SP.POP.TOTL?date=1995:1997'
+#wb_data = requests.get(url)
+#print(wb_data.text)
+
+
+################################################################
 #==========================IMPORTING FILES AND TRANSFORMING THEM (WITHOUT ANY MERGES)
 ########################### Working with the file that contains all Olympic events (file_olympians_all)
 
@@ -290,4 +299,3 @@ lifeexp_data_for_sns = olympics_results_lifeexp
 #plt.xlabel("GDP in $ trillions")
 #plt.title(str(medal_type_analysis) + str(" Medals per million ") + str(olympics_type) + str(' Olympics from ') +str(start_date) + str(" to ") + str(end_date)+  str(", by country")  )
 #plt.show()
-#Using Numpy https://stackabuse.com/calculating-pearson-correlation-coefficient-in-python-with-numpy/ to tell the corellation between GDP and olmypic performance
